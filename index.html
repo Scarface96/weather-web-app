@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather-App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="card">
+    <div class="search">
+        <input type="text" placeholder="enter city name" spellcheck="false">
+        <button><img src="images/search.png"></button>
+    </div>
+     <div class="error">
+        <p>Invalid city name</p>
+     </div>
+    <div class="weather">
+        <img src="images/rain.png" class="weather-icon">
+        <h1 class="temp">22°C</h1>
+        <h2 class="city">London</h2>
+        <div class="details">
+            <div class="col">
+                <img src="images/humidity.png">
+                <div>
+                    <p class="humidity">50%</p>
+                    <p>Humidity</p>
+                    
+        </div> 
+       </div>
+        <div class="col">
+                <img src="images/wind.png">
+                <div>
+                    <p class="wind">15 km/h</p>
+                    <p>Wind speed</p>
+                    
+        </div> 
+       </div>
+      </div>
+     </div>         
+    </div>
+
+    <script>
+
+    const apiKey = "b2ba0be780b57243e8ed28d267000f18";
+    const apiUrl = "https://api.openweathermap.org/data/2.5/weather";
+
+    async function checkWeather(city) {
+        const errorDiv = document.querySelector(".error");
+        if (!city) {
+            document.querySelector(".weather").style.display = "none";
+            errorDiv.style.display = "none";
+            return;
+        }
+        try {
+            const response = await fetch(`${apiUrl}?q=${city}&appid=${apiKey}&units=metric`);
+            if (!response.ok) {
+                document.querySelector(".weather").style.display = "none";
+                errorDiv.style.display = "block";
+                return;
+            }
+            var data = await response.json();
+            document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + "°C";
+            document.querySelector(".city").innerHTML = data.name;
+            document.querySelector(".humidity").innerHTML = data.main.humidity + "%";
+            document.querySelector(".wind").innerHTML = data.wind.speed + " km/h";
+
+            // Change icon based on temperature first
+            const temp = data.main.temp;
+            let iconSrc = "images/clear.png";
+            if (temp <= 0) {
+                iconSrc = "images/snow.png";
+            } else if (temp > 0 && temp <= 15) {
+                iconSrc = "images/clouds.png";
+            } else if (temp > 15 && temp <= 25) {
+                iconSrc = "images/clear.png";
+            } else if (temp > 25) {
+                iconSrc = "images/clear.png";
+            }
+            // Optionally, override with weather condition if needed
+            if(data.weather[0].main == "Rain") {
+                iconSrc = "images/rain.png";
+            } else if(data.weather[0].main == "Drizzle") {
+                iconSrc = "images/drizzle.png";
+            } else if(data.weather[0].main == "Mist") {
+                iconSrc = "images/mist.png";
+            }
+            document.querySelector(".weather").style.display = "block";
+            document.querySelector(".weather-icon").src = iconSrc;
+            errorDiv.style.display = "none";
+        } catch (error) {
+            document.querySelector(".weather").style.display = "none";
+            errorDiv.style.display = "block";
+        }
+    }
+
+    // Add event listener to search button
+    const searchBtn = document.querySelector(".search button");
+    const searchInput = document.querySelector(".search input");
+    searchBtn.addEventListener("click", () => {
+        const city = searchInput.value.trim();
+        checkWeather(city);
+    });
+    searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            const city = searchInput.value.trim();
+            checkWeather(city);
+        }
+    });
+
+    // Remove default city display on load
+    document.querySelector(".weather").style.display = "none";
+    document.querySelector(".error").style.display = "none";
+
+    </script>
+</body>
+</html>
